@@ -17,8 +17,9 @@ class Camera {
 			double theta = vfov*M_PI/180;
             dist_origin2sensor = 1.0/tan(theta/2);
 			forward = normalize(lookat-lookfrom);
-			right = normalize(cross(forward, vup));
-            up = normalize(cross(right, forward));
+			//right = normalize(cross(forward, vup));
+            //up = normalize(cross(right, forward));
+            orthonormalBasis(forward, right, up);
             origin = lookfrom;
         }
 		
