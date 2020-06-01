@@ -46,7 +46,8 @@ class Checker_texture : public Texture {
 		}
 
 	public:
-        double freq = 0.0625;
+        //double freq = 0.0625;
+        double freq = 4;
 		std::shared_ptr<Texture> odd;
 		std::shared_ptr<Texture> even;
 };
