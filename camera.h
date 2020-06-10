@@ -20,6 +20,7 @@ class Camera {
 			//right = normalize(cross(forward, vup));
             //up = normalize(cross(right, forward));
             orthonormalBasis(forward, right, up);
+            up *= -1;
             origin = lookfrom;
         }
 		
