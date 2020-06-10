@@ -349,9 +349,9 @@ void lookup_brdf_val(double* brdf, double theta_in, double fi_in,
 	blue_val = brdf[ind + BRDF_SAMPLING_RES_THETA_H*BRDF_SAMPLING_RES_THETA_D*BRDF_SAMPLING_RES_PHI_D] * BLUE_SCALE;
 
 	
-	if (red_val < 0.0 || green_val < 0.0 || blue_val < 0.0)
+	/*if (red_val < 0.0 || green_val < 0.0 || blue_val < 0.0)
 		fprintf(stderr, "Below horizon.\n");
-
+*/
 }
 
 // Read BRDF data
@@ -382,42 +382,53 @@ bool read_brdf(const char *filename, double* &brdf)
 
 class MERL : public Material {
 	public:
-  double* brdf;
+		double* brdf;
+		
 		MERL(const char* filename) {
-      read_brdf(filename, brdf);
-    }
+			read_brdf(filename, brdf);
+		}
 
-		RGB sample(const Hit& res, const Vec3& wo, Vec3& wi)
-			const{
-				//一様乱数
-				double u = rnd();
-				double v = rnd();
+		RGB sample(const Hit& res, const Vec3& wo, Vec3& wi) const {
+			//一様乱数
+			double u = rnd();
+			double v = rnd();
+			/*
+			//(theta, phi)の計算
+			//double theta_in = 0.5 * std::acos(1-2*u);
+			double theta_in = std::acos(std::sqrt(1-u));
+			double phi_in = 2*M_PI * v;
 
-				//(theta, phi)の計算
-				double theta_in = 0.5 * std::acos(1-2*u);
-				double phi_in = 2*M_PI * v;
+			//確率密度関数の値
+			double pdf = std::cos(theta_in)/M_PI;
+			*/
+			
 
-				//(x, y, z)の計算
-				double x = std::cos(phi_in)*std::sin(theta_in);
-				double y = std::cos(theta_in);
-				double z = std::sin(phi_in)*std::sin(theta_in);
+			//(theta, phi)の計算
+			double theta_in = 0.5*M_PI * u;
+			double phi_in = 2*M_PI * v;
 
-				//サンプリングされた方向
-				wi = Vec3(x, y, z);
+			//確率密度関数の値
+			double pdf = 1/(2*M_PI);
+			
 
-        double theta_out = std::acos(absCosTheta(wo));
-        Vec3 wi_xz(wi.x, 0, wi.z);
-        Vec3 wo_xz(wo.x, 0, wo.z);
-        double phi_out = phi_in + std::acos(dot(normalize(wi_xz), normalize(wo_xz)));
+			//(x, y, z)の計算
+			double x = std::cos(phi_in)*std::sin(theta_in);
+			double y = std::cos(theta_in);
+			double z = std::sin(phi_in)*std::sin(theta_in);
 
-        double r, g, b;
-        lookup_brdf_val(brdf, theta_in, phi_in, theta_out, phi_out, r, g, b);
-        Vec3 rho(r, g, b);
+			//サンプリングされた方向
+			wi = Vec3(x, y, z);
 
-				//確率密度関数の値
-				double pdf = std::cos(theta_in)/M_PI;
+        	double theta_out = std::acos(absCosTheta(wo));
+        	Vec3 wi_xz(wi.x, 0, wi.z);
+        	Vec3 wo_xz(wo.x, 0, wo.z);
+        	double phi_out = phi_in + std::acos(dot(normalize(wi_xz), normalize(wo_xz)));
 
-				return rho/M_PI/pdf;
+        	double r, g, b;
+        	lookup_brdf_val(brdf, theta_in, phi_in, theta_out, phi_out, r, g, b);
+        	Vec3 rho(r, g, b);
+
+			return rho/M_PI/pdf;
 		};
 };
 
