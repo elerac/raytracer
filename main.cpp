@@ -17,10 +17,10 @@
 
 #include <glob.h>
 
-//g++ --std=c++11 -Xpreprocessor -fopenmp -O3 -mtune=native -march=native -lomp main.cpp
+// g++ --std=c++11 -Xpreprocessor -fopenmp -O3 -mtune=native -march=native -lomp main.cpp
 
-const int MAX_DEPTH = 10; //最大反射回数
-const double ROULETTE = 0.95; //ロシアンルーレットの確率
+const int MAX_DEPTH = 15; //最大反射回数
+const double ROULETTE = 0.99; //ロシアンルーレットの確率
 
 //rayの方向から来る放射輝度の値を計算して返す
 //init_ray: 最初のレイ
@@ -108,10 +108,10 @@ Aggregate sample_scene(){
   //primitive
   auto ground = std::make_shared<Primitive>(large_sphere, checker);
   auto red_sphere = std::make_shared<Primitive>(sphere3, red);
-  auto earth_sphere = std::make_shared<Primitive>(sphere2, earth_surface);
+  auto earth_sphere = std::make_shared<Primitive>(sphere2, blue);
   auto mirror_sphere = std::make_shared<Primitive>(sphere1, blue);
   auto blue_box = std::make_shared<Primitive>(box, earth_surface);
-  auto light_sphere = std::make_shared<Primitive>(sphere3, light1);
+  auto light_sphere = std::make_shared<Primitive>(sphere1, light1);
   auto rect = std::make_shared<Primitive>(xy_rect, blue);
   auto glass_sphere = std::make_shared<Primitive>(sphere1, glass);
   auto merl_gold_sphere = std::make_shared<Primitive>(sphere1, merl_gold);
@@ -119,15 +119,15 @@ Aggregate sample_scene(){
   auto merl_steel_sphere = std::make_shared<Primitive>(sphere3, merl_steel);
 
   //add
-  //aggregate.add(red_sphere);
-  //aggregate.add(earth_sphere);
+  aggregate.add(red_sphere);
+  aggregate.add(earth_sphere);
   //aggregate.add(mirror_sphere);
-  aggregate.add(merl_gold_sphere);
-  aggregate.add(merl_yellow_sphere);
-  aggregate.add(merl_steel_sphere);
+  //aggregate.add(merl_gold_sphere);
+  //aggregate.add(merl_yellow_sphere);
+  //aggregate.add(merl_steel_sphere);
   //aggregate.add(glass_sphere);
   //aggregate.add(blue_box);
-  //aggregate.add(light_sphere);
+  aggregate.add(light_sphere);
   aggregate.add(ground);
   //aggregate.add(rect);
   return aggregate;
@@ -175,8 +175,8 @@ void scene_merl(Camera &cam, Aggregate &aggregate) {
   std::shuffle(files.begin(), files.end(), engine);
 
   double space = 3;
-  int width= 9;
-  int height = 6;
+  int width= 4; //9
+  int height = 3; //6
   for(int x=0; x<width; x++) {
     for(int z=0; z<height; z++) {
       auto merl = std::make_shared<MERL>(files[x*height+z].c_str());
@@ -195,30 +195,36 @@ void scene_merl(Camera &cam, Aggregate &aggregate) {
   Vec3 lookfrom(x_center, 24, -14);
   Vec3 lookat(x_center, 0, z_center*0.7);
   Vec3 vup(0, 1, 0);
-  double vfov = 32.0;
+  //double vfov = 32.0;
+  double vfov = 10.0; //拡大テスト用
   cam = {lookfrom, lookat, vup, vfov};
 }
 
 
 int main() {
   const int spp = 500; //サンプリング数
+  Image img(300, 200);
 
-  Image img(1280, 720);
+  //Image img(240, 120);
+  //Image img(2560, 1440);
+  //Image img(3840, 2160); //4K
 
   Aggregate aggregate;
-  Camera cam;
-  scene_merl(cam, aggregate);
+  //Camera cam;
+  //scene_merl(cam, aggregate);
   //IBL sky("envmap/PaperMill_E_3k.hdr");
-  IBL sky("envmap/skylit_garage_8k.hdr");
+  //IBL sky("envmap/skylit_garage_8k.hdr");
+  //IBL sky("envmap/paul_lobe_haus_4k.hdr");
   //SimpleSky sky; 
-  /*
+  
   aggregate = sample_scene();
   Vec3 lookfrom(0, 0, 3);
   Vec3 lookat(0, 0, 0);
   Vec3 vup(0, 1, 0);
   double vfov = 80.0;
-  //Camera cam(lookfrom, lookat, vup, vfov);
-  IBL sky("envmap/PaperMill_E_3k.hdr");*/
+  Camera cam(lookfrom, lookat, vup, vfov);
+  //IBL sky("envmap/PaperMill_E_3k.hdr");
+  UniformSky sky(Vec3(0));
 
   /*
   aggregate = my_cornell_box();
@@ -227,8 +233,8 @@ int main() {
   Vec3 vup(0, 1, 0);
   double vfov = 40.0;
   Camera cam(lookfrom, lookat, vup, vfov);
-  UniformSky sky(Vec3(0));
-  */
+  UniformSky sky(Vec3(0));*/
+  
   //IBL sky("veranda/veranda_4k.hdr");
  
 
