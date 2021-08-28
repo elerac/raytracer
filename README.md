@@ -14,7 +14,7 @@
   - Image
 - Transient Rendering
 
-## Cornel Box
+## Cornell Box
 ![](results/cornel.jpg)
 
 ## MERL BRDF
